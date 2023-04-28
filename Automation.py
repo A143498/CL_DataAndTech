@@ -166,3 +166,4 @@ ProgMonths_connect.close()
 print("")
 # Bringing in Session Time Reduced
 print("Session Time Reduced Information")
+print("")
