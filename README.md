@@ -18,7 +18,9 @@ pip install numpy
 Once those have run and are installed you need to make sure your computer DSN has a connection to the different data sources. Even though you have connection through SQL, or DB2, you need to make sure the connection is in your data source network. You can use the links below to connect to the different data sources using python. 
 
 connect to DB2https://githubprod.prci.com/progressive/progressive-python/blob/master/Connecting%20to%20Data/Connect%20to%20Data%20with%20Windows/Query%20DB2%20from%20Windows.py
+
 connect to DB2. https://progressiveinsurance.sharepoint.com/:w:/r/sites/BIDS%20Technical%20Forum/Python/_layouts/15/Doc.aspx?sourcedoc=%7B5D40D2B2-555B-4022-9310-73F186CD42CB%7D&file=Python%20Connecting%20to%20DB2%20Server%20on%20Windows.docx&action=default&mobileredirect=true&DefaultItemOpen=1&cid=9ae16055-aa3c-4017-a45e-ece3bbec07dd
+
 connect to different servers https://progressiveinsurance.sharepoint.com/sites/analytics/SiteAssets/SQL-Data-Connections.pdf#search=set%20up%20db2%20connection%20in%20odbc%20data%20sources
 
 One caveat to the connections, I have not connected to DB2 without error so this will need to be looked into to be able to get Docuflash's data into the excel. The other data sources all connect to one server and that is listed in the python file. 
