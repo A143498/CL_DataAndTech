@@ -4,8 +4,6 @@ Hello Everyone! Welcome to the location where I will be placing information rela
 
 In this repo, you will see information about each project, the breakdown of how to get information from each project, the start of the automation for the project backend, and the steps that have been going on to get through this project.
 
-Background information on this project 
-----------------------------------------
 
 Setting up Python to do automated part of the Project
 ----------------------------------------------------
@@ -25,3 +23,23 @@ connect to different servers https://progressiveinsurance.sharepoint.com/sites/a
 
 One caveat to the connections, I have not connected to DB2 without error so this will need to be looked into to be able to get Docuflash's data into the excel. The other data sources all connect to one server and that is listed in the python file. 
 
+Background information on this project 
+----------------------------------------
+
+For this project, you need to understand that 4 of the projects come from one data source. Location: MSS-P1-PCA-06
+The projects may come from different tables within PCA-06 but you still use just one connection. 
+The one project not in this location is docuflash. That is located in DB2. More background information on these projects are located at this file path location: "K:\CVOWB\Martha\TableauAutomation". 
+
+In the python document file, you will need to connect some of the queries to the prog month table still but this shouldn't be too difficult.
+
+A few things that need to be done within the python code still.
+1. bring in Docuflash data
+2. verify the numbers are correct across each project
+3. connect each of the tables to the progressive month table. Make sure when connecting that you are at the daily level and then switch to prog month after. I saw this was an issue that could happen and this should be verified before moving on and assuming it is correct!
+4. Verify that the data already brought in is capturing the correct calculations and the correct numbers for those calculations.
+5. merge all of the data together 
+6. export the data to an excel file.
+7. verify the export looks like the current excel being used. If not, you need to figure a way to make them similair.
+
+
+I did not put in the quarter-year calculation that is in the excel so this needs to be done as well.
