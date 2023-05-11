@@ -32,7 +32,9 @@ Where
 Group By FORMAT(EmailSentDate, 'MM-yy')
 """
 
+
 LR_df = pd.read_sql(LR_Table, PCA_connect)
+
 
 LR_df["Year"] = LR_df["Date"].str[-2:]
 
@@ -76,8 +78,10 @@ GROUP BY FORMAT(ClickDateTime, 'yyyy-MM-dd');
 """
 # Top 100 count(INFOID) as dis_INFOID,  distinct FORMAT(ClickDateTime, 'MM-yy') as date where ClickDateTime > '02-27-23'
 # execute the statement
+
 COI_df = pd.read_sql(COI_Table, PCA_connect)
 print(COI_df)
+
 
 # this is where I am bringing in the Progressive accounting months. because it uses PCA-06 as well, you don't need to create a new connection to the data source. You can use the one from the beginning of the python script. I only brought in accounting months from jan 2022 to now because the projects started then. we don't need the months before
 
@@ -112,6 +116,7 @@ print(COI_groupe)
 
 print("Self - Service Project Below")
 # the only thing this needs is to connect to the prog months data frame and sort out the months into progressive months and we should be good with this connection. and to add in the calculation for the quarters.
+
 
 
 # this is the SQL query to bring in the different pagenames for the Self-Service project and the Session Time Reduced project
@@ -167,6 +172,7 @@ SessionTime_df = pd.read_sql(SessionTime_Service_Table, PCA_connect)
 print(SessionTime_df)
 
 # this is where I am bringing in the Progressive accounting months. because it uses PCA-06 as well, you don't need to create a new connection to the data source. You can use the one from the beginning of the python script. I only brought in accounting months from jan 2022 to now because the projects started then. we don't need the months before
+
 # ProgMonths_Table = """
 # SELECT DT_VAL, ACCT_CCYYMM
 # FROM [FSScoreCard].[CLCQ].[DimDate]
@@ -176,6 +182,7 @@ print(SessionTime_df)
 # # this statement below reads the query and associates it to the connect on line 93 currently.
 # ProgMonths_df = pd.read_sql(ProgMonths_Table, PCA_connect)
 # I am commenting this out for the time being. this variable is located on line 91 so you shoulldn't have to re-establish the variable again (unless it has changed but in this case, it has not.)
+
 
 # below is a merge. A merge is very similar to a join in SAS. Look up a merge to understand more.
 print("Prog Self Service With Prog Months.")
@@ -268,6 +275,7 @@ def InternalRate(row):
         return 106  # this number needs to be changed to the number correct for 2023.
 
 
+
 SelfService["Internal_Rate"] = SelfService.apply(InternalRate, axis=1)
 
 
@@ -308,7 +316,9 @@ print("")
 print("Session Time Reduced Project Below")
 Baseline = {"OrderBase": [0.313570414102314], "AdditionalBase": [0.175184323782372]}
 Baseline_df = pd.DataFrame(Baseline)
+
 # print(Baseline_df)  # prints the baseline dataframe
+
 
 SessionTimeReduced["Expected_Order_Results"] = (
     SessionTimeReduced["AdditionalDetails"] / Baseline_df["AdditionalBase"]
