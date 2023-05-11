@@ -45,3 +45,6 @@ A few things that need to be done within the python code still.
 
 
 I did not put in the quarter-year calculation that is in the excel so this needs to be done as well.
+
+Also, this GitHub project has the most updated python file until it has been saved in the file folder as well.
+

@@ -5,13 +5,15 @@ import pyodbc as p
 import pandas as pd
 import numpy as np
 
-# python "u:/Github Training/trialfile.py"        <- run this to get the code to work. for some reason my code doesn't run unless you add this.
+# python "K:\CVOWB\Martha\TableauAutomation.py"        <- run this to get the code to work. for some reason my code doesn't run unless you add this.
+
+# this creates the connection to PCA-06. make sure you have the DSN connected on your computer or accessing the data source will not work.
+PCA_connect = p.connect("DSN=MSS-P1-PCA-06")
 
 # Bringing in Loss Run
 print("Loss Run Information")
 # the only thing this needs is to connect to the prog months data frame and sort out the months into progressive months and we should be good with this connection. and to add in the calculation for the quarters.
 
-LR_connect = p.connect("DSN=MSS-P1-PCA-06")
 
 LR_Table = """
 Select top 100
@@ -30,7 +32,9 @@ Where
 Group By FORMAT(EmailSentDate, 'MM-yy')
 """
 
-LR_df = pd.read_sql(LR_Table, LR_connect)
+
+LR_df = pd.read_sql(LR_Table, PCA_connect)
+
 
 LR_df["Year"] = LR_df["Date"].str[-2:]
 
@@ -59,7 +63,6 @@ LR_df["Quarter Year"] = LR_df["Year"]
 LR_df = LR_df[["Project", "Sub-project", "Date", "Year", "Quarter Year", "Money Saved"]]
 print(LR_df)
 
-LR_connect.close()
 
 # Bringing in Docuflash
 print("Docuflash Information")
@@ -68,20 +71,45 @@ print("Docuflash Information")
 # Bringing in COI
 print("COI Information")
 
-COI_connect = p.connect("DSN=MSS-P1-PCA-06")
-
 COI_Table = """
-SELECT count(distinct(INFOID)) as dis_INFOID, FORMAT(ClickDateTime, 'MM-yy') as date
+SELECT count(distinct(INFOID)) as dis_INFOID, FORMAT(ClickDateTime, 'yyyy-MM-dd') as date
 FROM FSScoreCard.CLCQ.CLEXP_MLTIPRDTCOIData
-GROUP BY FORMAT(ClickDateTime, 'MM-yy');
+GROUP BY FORMAT(ClickDateTime, 'yyyy-MM-dd');
 """
 # Top 100 count(INFOID) as dis_INFOID,  distinct FORMAT(ClickDateTime, 'MM-yy') as date where ClickDateTime > '02-27-23'
 # execute the statement
-COI_df = pd.read_sql(COI_Table, COI_connect)
-# print(COI_df)
 
-# close connection
-COI_connect.close()
+COI_df = pd.read_sql(COI_Table, PCA_connect)
+print(COI_df)
+
+
+# this is where I am bringing in the Progressive accounting months. because it uses PCA-06 as well, you don't need to create a new connection to the data source. You can use the one from the beginning of the python script. I only brought in accounting months from jan 2022 to now because the projects started then. we don't need the months before
+
+ProgMonths_Table = """
+SELECT DT_VAL, ACCT_CCYYMM
+FROM [FSScoreCard].[CLCQ].[DimDate]
+  where ACCT_CCYY >= 2022
+"""
+
+# this statement below reads the query and associates it to the connect on line ----------------------------.
+ProgMonths_df = pd.read_sql(ProgMonths_Table, PCA_connect)
+print(ProgMonths_df)
+
+# below is a merge. A merge is very similar to a join in SAS. Look up a merge to understand more.
+COI = pd.merge(ProgMonths_df, COI_df, how="inner", left_on="DT_VAL", right_on="date")
+
+print(COI)
+
+COI_grouped = COI.groupby("ACCT_CCYYMM").sum()
+# need to figure out how to only grab the dis_infoid and the ACCT_CCYYMM. Below, that isn't the best way so it needs to be reworked a little bit.
+
+COI_groupe = COI_grouped[["ACCT_CCYYMM", "dis_INFOID"]]
+print(COI_groupe)
+
+# after you get that worked out, you can add in the calculation to work with the numbers above. I am going to comment out the stuff below but this is close to what I was thinking could be added to create the calc for the project saved each month
+
+# you need to go to the https://progressiveinsurance.sharepoint.com/:x:/r/sites/CLExperience/_layouts/15/Doc.aspx?sourcedoc=%7Bb84ed224-681c-48f2-b046-ed9e902b19e0%7D&action=edit&activeCell=%27Summary%20used%20in%20Monthly%27!B92&wdinitialsession=716985b7-9a79-4fcf-9cba-d5365a3b2b13&wdrldsc=16&wdrldc=1&wdrldr=AccessTokenExpiredWarning%2CRefreshingExpiredAccessT&cid=da31ddc6-b889-44fd-98e8-559dbd6cadd2 url
+# once you are there, go to the COI tab and look at the calculations done. You can mimic what is already done in here to grab the calculations.
 
 
 # Bringing in Self-Service
@@ -89,8 +117,7 @@ COI_connect.close()
 print("Self - Service Project Below")
 # the only thing this needs is to connect to the prog months data frame and sort out the months into progressive months and we should be good with this connection. and to add in the calculation for the quarters.
 
-# this creates the connection to PCA-06. make sure you have the DSN connected on your computer or accessing the data source will not work.
-PCA_connect = p.connect("DSN=MSS-P1-PCA-06")
+
 
 # this is the SQL query to bring in the different pagenames for the Self-Service project and the Session Time Reduced project
 SessionTime_Service_Table = """
@@ -145,14 +172,17 @@ SessionTime_df = pd.read_sql(SessionTime_Service_Table, PCA_connect)
 print(SessionTime_df)
 
 # this is where I am bringing in the Progressive accounting months. because it uses PCA-06 as well, you don't need to create a new connection to the data source. You can use the one from the beginning of the python script. I only brought in accounting months from jan 2022 to now because the projects started then. we don't need the months before
-ProgMonths_Table = """
-SELECT DT_VAL, ACCT_CCYYMM
-FROM [FSScoreCard].[CLCQ].[DimDate]
-  where ACCT_CCYY >= 2022
-"""
 
-# this statement below reads the query and associates it to the connect on line 93 currently.
-ProgMonths_df = pd.read_sql(ProgMonths_Table, PCA_connect)
+# ProgMonths_Table = """
+# SELECT DT_VAL, ACCT_CCYYMM
+# FROM [FSScoreCard].[CLCQ].[DimDate]
+#   where ACCT_CCYY >= 2022
+# """
+
+# # this statement below reads the query and associates it to the connect on line 93 currently.
+# ProgMonths_df = pd.read_sql(ProgMonths_Table, PCA_connect)
+# I am commenting this out for the time being. this variable is located on line 91 so you shoulldn't have to re-establish the variable again (unless it has changed but in this case, it has not.)
+
 
 # below is a merge. A merge is very similar to a join in SAS. Look up a merge to understand more.
 print("Prog Self Service With Prog Months.")
@@ -206,6 +236,7 @@ SelfService["Date"] = (
     SelfService["ACCT_CCYYMM"].str[2:4] + "-" + SelfService["ACCT_CCYYMM"].str[4:]
 )
 
+
 # creates the calculation for Minimum Flow. needs to be changed each year. to do that, you just change the number.
 def MinimumFlow(row):
     if row["Year"] == "22":
@@ -235,6 +266,7 @@ SelfService["Benefit_Hrs"] = (
     + (SelfService["Endorsement_HairCut"] * SelfService["AvgUser"])
 ) / 3600
 
+
 # get avg user for the year. change if it changes each year
 def InternalRate(row):
     if row["Year"] == "22":
@@ -242,7 +274,10 @@ def InternalRate(row):
     elif row["Year"] == "23":
         return 106  # this number needs to be changed to the number correct for 2023.
 
+
+
 SelfService["Internal_Rate"] = SelfService.apply(InternalRate, axis=1)
+
 
 # creates the calculation for Money Saved. this will need to be updated each year if the .9 changes.
 def Money(row):
@@ -250,6 +285,7 @@ def Money(row):
         return SelfService["Benefit_Hrs"] * SelfService["Internal_Rate"] * 0.9
     elif row["Year"] == "23":
         return SelfService["Benefit_Hrs"] * SelfService["Internal_Rate"] * 0.9
+
 
 SelfService["Money Saved"] = SelfService.apply(Money, axis=1)
 
@@ -280,7 +316,9 @@ print("")
 print("Session Time Reduced Project Below")
 Baseline = {"OrderBase": [0.313570414102314], "AdditionalBase": [0.175184323782372]}
 Baseline_df = pd.DataFrame(Baseline)
-print(Baseline_df)  # prints the baseline dataframe
+
+# print(Baseline_df)  # prints the baseline dataframe
+
 
 SessionTimeReduced["Expected_Order_Results"] = (
     SessionTimeReduced["AdditionalDetails"] / Baseline_df["AdditionalBase"]
